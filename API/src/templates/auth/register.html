@@ -1,0 +1,61 @@
+{% extends './base.html' %}
+{% block tittle %}Register{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" href="{{url_for('static', filename='CSS/login.css')}}">
+{% endblock %}
+
+
+{% block body %}
+<body class="text-center">
+    
+    <main class="form-signin w-100 m-auto">
+      <form action="/register" method="POST">
+        <img class="mb-4" src="{{url_for('static', filename='img/login.png')}}" alt="" width="72" height="57">
+        {% with messages = get_flashed_messages() %}
+
+        {% if messages %}
+        <br />
+        {% for message in messages %}
+        <div class="alert alert-primary alert-dismissible" role="alert">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% endwith %}
+        <h1 class="h3 mb-3 fw-normal">Please Sign up</h1>
+        
+        <div class="form-floating">
+          <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+          <label for="floatingInput">Username</label>
+        </div>
+        <div class="form-floating">
+          <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="Password">
+          <label for="floatingPassword">Password</label>
+        </div>
+        <div class="form-floating">
+            <input type="text" class="form-control" id="fullname" name="fullname" placeholder="fullname">
+            <label for="floatingInput">Full Name</label>
+        </div>
+        <div class="form-floating">
+            <input type="file" class="form-control" id="file" name="Photo" placeholder="Photo">
+            <label for="floatingInput">Photo</label>
+        </div>
+
+    
+        <div class="checkbox mb-3">
+          <label>
+            <input type="checkbox" value="remember-me"> Remember me
+          </label>
+        </div>
+        <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+        <p class="mt-5 mb-3 text-muted">&copy; 2017–2022</p>
+      </form>
+    </main>
+    
+    
+        
+      </body>
+{% endblock %}

@@ -1,7 +1,8 @@
-from flask import Flask, render_template,request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from config import config
 from flask_mysqldb import MySQL
 from flask_login import LoginManager, login_user, logout_user, login_required
+from werkzeug.security import generate_password_hash
 
 from models.ModelUsers import ModelUser
 
@@ -12,19 +13,20 @@ app = Flask(__name__)
 db = MySQL(app)
 login_manager_app = LoginManager(app)
 
+
 @login_manager_app.user_loader
 def load_user(id):
     return ModelUser.get_by_id(db, id)
+
 
 @app.route('/')
 def index():
     return redirect(url_for('login'))
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method=='POST':
-        # print(request.form['username'])
-        # print(request.form['password'])
+    if request.method == 'POST':
         user = User(0, request.form['username'], request.form['password'])
         logged_user = ModelUser.login(db, user)
         if logged_user != None:
@@ -41,28 +43,104 @@ def login():
     else:
         return render_template('auth/login.html')
 
+
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        encrip = generate_password_hash(request.form['password']) 
+        cursor = db.connection.cursor()
+        sql = """INSERT INTO user (username, password, fullname) VALUES ('{}','{}','{}')""".format(request.form['username'], encrip, request.form['fullname'])
+        print(sql)
+        cursor.execute(sql)
+        db.connection.commit() #confirm action
+        return("ok")
+    else:
+        return render_template('auth/register.html')
+
+
 @app.route('/home')
 def home():
     return render_template('home.html')
 
-@app.route('/protected')
-@login_required
+
+@app.route('/protected',  methods=['GET'])
 def protected():
-    return "<h1>Esta es una vista protegida, solo para usuarios autenticados.</h1>"
+    try:
+        cursor = db.connection.cursor()
+        sql = "SELECT id, username, password, fullname FROM user"
+        cursor.execute(sql)
+        data = cursor.fetchall()
+        list_users = []
+        for row in data:
+            user_data = {'id': row[0], 'username': row[1],
+                         'password': row[2], 'fullname': row[3]}
+            list_users.append(user_data)
+        return jsonify({'list_users': list_users, 'message': "user data"})
+
+    except Exception as ex:
+        return jsonify({'message': "Error"})
+
+@app.route('/protected', methods=['POST'])
+def register_user():
+    # print(request.json)
+    try:
+        cursor = db.connection.cursor()
+        encrip = generate_password_hash(request.json['password'])
+
+        sql = """INSERT INTO user (username, password, fullname) 
+                VALUES ('{}','{}','{}')""".format(request.json['username'], encrip, request.json['fullname'])
+        cursor.execute(sql)
+        db.connection.commit() #confirm
+        return jsonify({'message': "mensaje registrado"})
+    except Exception as ex:
+        return jsonify({'ex':ex, 'message': "Error"})
+
+@app.route('/protected/<username>', methods=['PUT'])
+def update_data(username):
+    try:
+        encrip = generate_password_hash(request.json['password'])
+        cursor = db.connection.cursor()
+        sql = """UPDATE user SET fullname = '{}' 
+        WHERE username = '{}'""".format(request.json['fullname'], username)
+        print(sql)
+        cursor.execute(sql)
+        db.connection.commit()  
+        return jsonify({'mensaje': "Curso actualizado.", 'exito': True})
+        
+    except Exception as ex:
+        return jsonify({'mensaje': "Error", 'exito': False})
+    
+
+@app.route('/protected/<username>', methods=['DELETE'])
+def delete_user(username):
+    try:
+       
+        cursor = db.connection.cursor()
+        sql = "DELETE FROM user WHERE username = '{}'".format(username)
+        cursor.execute(sql)
+        db.connection.commit()  # Confirm.
+        return jsonify({'mensaje': "Curso eliminado.", 'exito': True})
+        
+    except Exception as ex:
+        return jsonify({'mensaje': "Error", 'exito': False})
+
+
 
 def status_401(error):
     return redirect(url_for('login'))
 
 
 def status_404(error):
-    return "<h1>Página no encontrada</h1>", 404    
+    return "<h1>Página no encontrada</h1>", 404
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     app.config.from_object(config['development'])
     app.register_error_handler(401, status_401)
     app.register_error_handler(404, status_404)
