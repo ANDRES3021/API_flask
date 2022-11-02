@@ -10,7 +10,6 @@ class ModelUser():
                     WHERE username = '{}'""".format(user.username)
             cursor.execute(sql)
             row=cursor.fetchone()
-            print(row)
             if row != None:
                 user = User(row[0], row[1], User.check_password(row[2], user.password), row[3])
                 return user
@@ -19,21 +18,6 @@ class ModelUser():
         except Exception as ex:
             raise Exception(ex)
 
-    @classmethod
-    def register(self, db, user):
-        # username = user['username']
-        # password = user['password']
-        # fullname = user['fullname']
-        try:
-           cursor= db.connection.cursor()
-           print(user.username)
-           
-           sql = """'INSERT INTO user (id, username, password, fullname) VALUES(NULL, '{}', '{}', '{}')'""".format(user.username, user.password, user.fullname)
-           res = cursor.execute(sql)
-           
-           return res
-        except Exception as ex:
-            raise Exception(ex)
 
     @classmethod
     def get_by_id(self, db, id):

@@ -56,7 +56,6 @@ def register():
         encrip = generate_password_hash(request.form['password']) 
         cursor = db.connection.cursor()
         sql = """INSERT INTO user (username, password, fullname) VALUES ('{}','{}','{}')""".format(request.form['username'], encrip, request.form['fullname'])
-        print(sql)
         cursor.execute(sql)
         db.connection.commit() #confirm action
         return redirect(url_for('home'))
@@ -108,7 +107,6 @@ def update_data(username):
         cursor = db.connection.cursor()
         sql = """UPDATE user SET fullname = '{}' 
         WHERE username = '{}'""".format(request.json['fullname'], username)
-        print(sql)
         cursor.execute(sql)
         db.connection.commit()  
         return jsonify({'message': "user update.", 'exit': True})
