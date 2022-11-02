@@ -4,6 +4,8 @@
 
 
 {% block body %}
-<h1>Bienvenido, {{ current_user.fullname }}</h1>
-<a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+<h1 style="text-align:center ;">Welcome, {{ current_user.fullname }}</h1>
+<p  style="text-align:center;"">This is a page built with the flask framework, in which a user can register and use the following <a  href="/API">API</a></p>
+<br>
+<a  class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
 {% endblock %}

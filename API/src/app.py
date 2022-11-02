@@ -59,7 +59,7 @@ def register():
         print(sql)
         cursor.execute(sql)
         db.connection.commit() #confirm action
-        return("ok")
+        return redirect(url_for('home'))
     else:
         return render_template('auth/register.html')
 
@@ -69,7 +69,7 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/protected',  methods=['GET'])
+@app.route('/API',  methods=['GET'])
 def protected():
     try:
         cursor = db.connection.cursor()
@@ -86,7 +86,7 @@ def protected():
     except Exception as ex:
         return jsonify({'message': "Error"})
 
-@app.route('/protected', methods=['POST'])
+@app.route('/API', methods=['POST'])
 def register_user():
     # print(request.json)
     try:
@@ -97,11 +97,11 @@ def register_user():
                 VALUES ('{}','{}','{}')""".format(request.json['username'], encrip, request.json['fullname'])
         cursor.execute(sql)
         db.connection.commit() #confirm
-        return jsonify({'message': "mensaje registrado"})
+        return jsonify({'message': "message OK"})
     except Exception as ex:
         return jsonify({'ex':ex, 'message': "Error"})
 
-@app.route('/protected/<username>', methods=['PUT'])
+@app.route('/API/<username>', methods=['PUT'])
 def update_data(username):
     try:
         encrip = generate_password_hash(request.json['password'])
@@ -111,13 +111,13 @@ def update_data(username):
         print(sql)
         cursor.execute(sql)
         db.connection.commit()  
-        return jsonify({'mensaje': "Curso actualizado.", 'exito': True})
+        return jsonify({'message': "user update.", 'exit': True})
         
     except Exception as ex:
-        return jsonify({'mensaje': "Error", 'exito': False})
+        return jsonify({'message': "Error", 'exit': False})
     
 
-@app.route('/protected/<username>', methods=['DELETE'])
+@app.route('/API/<username>', methods=['DELETE'])
 def delete_user(username):
     try:
        
@@ -125,10 +125,10 @@ def delete_user(username):
         sql = "DELETE FROM user WHERE username = '{}'".format(username)
         cursor.execute(sql)
         db.connection.commit()  # Confirm.
-        return jsonify({'mensaje': "Curso eliminado.", 'exito': True})
+        return jsonify({'message': "user DELTE.", 'exit': True})
         
     except Exception as ex:
-        return jsonify({'mensaje': "Error", 'exito': False})
+        return jsonify({'message': "Error", 'exit': False})
 
 
 
@@ -137,7 +137,7 @@ def status_401(error):
 
 
 def status_404(error):
-    return "<h1>Página no encontrada</h1>", 404
+    return "<h1>Pág not found</h1>", 404
 
 
 if __name__ == '__main__':
